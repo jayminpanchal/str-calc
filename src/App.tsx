@@ -9,10 +9,22 @@ function App() {
     setExpression(e.target.value);
   };
 
-  const onCalculate = () => {};
+  const onCalculate = () => {
+    try {
+      const strNumbers = expression.split(",");
+      const result = strNumbers.reduce((total, num) => {
+        // console.log("num", num, /^[0-9]+[.]{0,1}[0-9]*$/.test(num))
+        if (!/^[0-9]+[.]{0,1}[0-9]*$/.test(num.trim())) return total;
+
+        total += parseInt(num.trim());
+        return total;
+      }, 0);
+      setResult(`Output: ${result}`);
+    } catch (e) {}
+  };
 
   return (
-    <div className="p-8 flex flex-1 items-center justify-center">
+    <div className="p-8 flex flex-1 items-center justify-center flex-col">
       <div className="flex space-x-2 items-center">
         <input
           className="h-10 border border-slate-500 rounded flex flex-1 w-64 px-4"
@@ -30,7 +42,11 @@ function App() {
           Calculate
         </button>
       </div>
-      {result && <p data-testid="text-result">{result}</p>}
+      {result && (
+        <p className="mt-4" data-testid="text-result">
+          {result}
+        </p>
+      )}
     </div>
   );
 }
