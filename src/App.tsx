@@ -1,6 +1,8 @@
 import { ChangeEvent, useState } from "react";
 import "./App.css";
 
+const pattern = /^\/\/(.+)\\n(.+)$/;
+
 function App() {
   const [expression, setExpression] = useState("");
   const [result, setResult] = useState("");
@@ -11,16 +13,32 @@ function App() {
 
   const onCalculate = () => {
     try {
-      const strNumbers = expression.split(",");
+      let delimeter = ",";
+      let strExp = expression;
+      if (pattern.test(expression)) {
+        const matches = expression.match(pattern);
+        if (matches && matches.length > 2) {
+          delimeter = matches[1];
+          strExp = matches[2];
+        }
+      }
+      const strNumbers = strExp.split(delimeter);
       const result = strNumbers.reduce((total, num) => {
         // console.log("num", num, /^[0-9]+[.]{0,1}[0-9]*$/.test(num))
-        if (!/^[0-9]+[.]{0,1}[0-9]*$/.test(num.trim())) return total;
+        if (!/^-?\d*\.?\d+$/.test(num.trim())) return total;
+
+        if (Math.sign(parseInt(num.trim())) === -1) {
+          throw new Error(`negative numbers not allowed ${num.trim()}`);
+        }
 
         total += parseInt(num.trim());
         return total;
       }, 0);
       setResult(`Output: ${result}`);
-    } catch (e) {}
+    } catch (e) {
+      console.log("e", e);
+      setResult((e as Error).message);
+    }
   };
 
   return (
@@ -31,6 +49,7 @@ function App() {
           type="text"
           data-testid="input-expression"
           onChange={onChange}
+          value={expression}
         />
         <button
           onClick={onCalculate}
